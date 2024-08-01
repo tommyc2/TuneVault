@@ -11,8 +11,20 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.annotation.Nullable;
 import android.widget.Button;
+import android.widget.ArrayAdapter;
+import android.media.MediaPlayer;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private List<Uri> listOfSongs = new ArrayList<>();
+    private MediaPlayer mediaPlayer;
+    private int currSongIndex = 0;
+    private ArrayAdapter<String> arrayAdapterListView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +36,11 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        ListView listViewSongs = findViewById(R.id.listViewSongs);
+        arrayAdapterListView = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, new ArrayList<String>());
+        listViewSongs.setAdapter(arrayAdapterListView);
+        mediaPlayer = new MediaPlayer(); // initialize media player in create function
     }
 
 
@@ -38,11 +55,52 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, intent);
         if (requestCode == 1 && resultCode == RESULT_OK) {
             if (intent != null) {
-                Uri uri = intent.getData();
+                Uri audioUri = intent.getData(); // file path
 
-                System.out.println("File Path - " + uri.toString());
+                if (listOfSongs.add(audioUri)){
+                    arrayAdapterListView.add(audioUri.toString());
+                    arrayAdapterListView.notifyDataSetChanged();
+                }
+
             }
         }
+    }
+
+    public void playSongs(View view) {
+        if (!listOfSongs.isEmpty()) {
+            currSongIndex = 0;
+            playNextSong(view);
+        }
+    }
+
+    public void playNextSong(View view) {
+        if (currSongIndex < listOfSongs.size()) {
+            Uri songUri = listOfSongs.get(currSongIndex);
+            try {
+                mediaPlayer.reset();
+                mediaPlayer.setDataSource(this, songUri);
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        currSongIndex++;
+                        playNextSong(view);
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+        super.onDestroy();
     }
 
 
