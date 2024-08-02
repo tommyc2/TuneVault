@@ -1,8 +1,10 @@
 package com.example.tunevault;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.view.View;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,10 +12,10 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.annotation.Nullable;
-import android.widget.Button;
 import android.widget.ArrayAdapter;
 import android.media.MediaPlayer;
 import android.widget.ListView;
+import android.media.MediaMetadataRetriever;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private int currSongIndex = 0;
     private ArrayAdapter<String> arrayAdapterListView;
+    public static final int REQUEST_PERMISSION_CODE = 2;
 
 
     @Override
@@ -56,10 +59,13 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 1 && resultCode == RESULT_OK) {
             if (intent != null) {
                 Uri audioUri = intent.getData(); // file path
+                String songTitle = getFileNameOfMP3(audioUri); // mp3 file name used as song title
 
                 if (listOfSongs.add(audioUri)){
-                    arrayAdapterListView.add(audioUri.toString());
-                    arrayAdapterListView.notifyDataSetChanged();
+                    if (songTitle.toLowerCase().contains(".mp3")) {
+                        arrayAdapterListView.add(songTitle.substring(0, songTitle.length() - 4));
+                        arrayAdapterListView.notifyDataSetChanged();
+                    }
                 }
 
             }
@@ -71,6 +77,14 @@ public class MainActivity extends AppCompatActivity {
             currSongIndex = 0;
             playNextSong(view);
         }
+    }
+
+    private String getFileNameOfMP3(Uri uri){
+        Cursor returnCursor = getContentResolver().query(uri, null, null, null, null);
+        int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+        returnCursor.moveToFirst();
+
+        return returnCursor.getString(nameIndex);
     }
 
     public void playNextSong(View view) {
