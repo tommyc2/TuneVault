@@ -33,6 +33,15 @@
             android:name=".MusicService"
             android:foregroundServiceType="mediaPlayback" />
 
+        <!-- Receiver declaration -->
+        <receiver
+            android:name=".MPStatusReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="MEDIA_PLAYER_STATUS" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

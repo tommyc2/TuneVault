@@ -1,7 +1,5 @@
 package com.example.tunevault;
 
-import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
-
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -18,13 +16,21 @@ import androidx.core.app.NotificationCompat;
 public class MusicService extends Service {
 
     private static final String CHANNEL_ID = "MusicServiceChannel";
-    private MediaPlayer mediaPlayer;
-    private int currSongIndex = 0;
+    public MediaPlayer mediaPlayer;
+    public int currSongIndex = 0;
 
     @Override
     public void onCreate() {
         super.onCreate();
         mediaPlayer = new MediaPlayer();
+    }
+
+    public MediaPlayer getMediaPlayer() {
+        return mediaPlayer;
+    }
+
+    public int getCurrSongIndex() {
+        return currSongIndex;
     }
 
     @Override
@@ -37,7 +43,7 @@ public class MusicService extends Service {
             playNextSong();
         }
         else if ("PAUSE".equals(action)) {
-            pause(); // pauses song
+            pause();
         }
 
         createNotificationChannel();
@@ -60,15 +66,25 @@ public class MusicService extends Service {
     private void playSong() {
         if (!MainActivity.listOfSongs.isEmpty()) {
             currSongIndex = 0;
-            playNextSong();
+            playCurrentSong();
         }
     }
 
     private void pause(){
-        if (mediaPlayer.isPlaying()) mediaPlayer.pause();
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.pause();
+        }
+
     }
 
-    private void playNextSong() {
+    private void playNextSong(){
+        if (mediaPlayer != null) {
+            currSongIndex = (currSongIndex + 1) % MainActivity.listOfSongs.size();
+            playCurrentSong();
+        }
+    }
+
+    private void playCurrentSong() {
         if (currSongIndex < MainActivity.listOfSongs.size()) {
             Uri songUri = MainActivity.listOfSongs.get(currSongIndex);
             try {
@@ -76,12 +92,8 @@ public class MusicService extends Service {
                 mediaPlayer.setDataSource(this, songUri);
                 mediaPlayer.prepare();
                 mediaPlayer.start();
-                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-                        currSongIndex++;
-                        playNextSong();
-                    }
+                mediaPlayer.setOnCompletionListener(mediaPlayer -> {
+                    playNextSong();
                 });
             } catch (Exception e) {
                 e.printStackTrace();

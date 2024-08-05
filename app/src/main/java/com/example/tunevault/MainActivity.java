@@ -1,6 +1,8 @@
 package com.example.tunevault;
 
+
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,21 +16,23 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.annotation.Nullable;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
 import java.util.ArrayList;
 import java.util.List;
+import android.os.Build;
 
 public class MainActivity extends AppCompatActivity {
 
     public static List<Uri> listOfSongs = new ArrayList<>();
     private ArrayAdapter<String> arrayAdapterListView;
-
+    private MusicService musicService = new MusicService();
+    private boolean isPlaying = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -38,6 +42,10 @@ public class MainActivity extends AppCompatActivity {
         ListView listViewSongs = findViewById(R.id.listViewSongs);
         arrayAdapterListView = new ArrayAdapter<>(this,android.R.layout.simple_list_item_1, new ArrayList<String>());
         listViewSongs.setAdapter(arrayAdapterListView);
+
+    }
+
+    public void updateIsPlaying(){
 
     }
 
@@ -75,23 +83,37 @@ public class MainActivity extends AppCompatActivity {
         return returnCursor.getString(nameIndex);
     }
 
-    public void playSongs(View view) {
-        Intent playIntent = new Intent(MainActivity.this, MusicService.class);
-        playIntent.setAction("PLAY");
-        startService(playIntent);
+    public void handlePlayPause(View view) {
+        if (isPlaying) {
+            sendData("PAUSE");
+        }
+        else {
+            sendData("PLAY");
+        }
+    }
+
+    public void sendData(String actionMessage) {
+        Intent intent = new Intent(MainActivity.this, MusicService.class);
+
+        if (actionMessage.equals("PLAY")){
+            isPlaying = true;
+            intent.setAction("PLAY");
+            startService(intent);
+        }
+        else if (actionMessage.equals("PAUSE")){
+            isPlaying = false;
+            intent.setAction("PAUSE");
+            startService(intent);
+        }
+
+
     }
 
     public void playNextSong(View view) {
+        isPlaying = true;
         Intent intent = new Intent(MainActivity.this, MusicService.class);
         intent.setAction("NEXT");
         startService(intent);
     }
-
-    public void pauseSong(View view) {
-        Intent intent = new Intent(MainActivity.this, MusicService.class);
-        intent.setAction("PAUSE");
-        startService(intent);
-    }
-
 
 }
