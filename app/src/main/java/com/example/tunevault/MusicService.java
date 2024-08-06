@@ -46,6 +46,23 @@ public class MusicService extends Service {
             pause();
         }
 
+        Intent playIntent = new Intent(this, MusicService.class);
+        playIntent.setAction("PLAY");
+        PendingIntent playPendingIntent = PendingIntent.getService(this, 0, playIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        Intent prevIntent = new Intent(this, MusicService.class);
+        playIntent.setAction("PREVIOUS");
+        PendingIntent previousPendingIntent = PendingIntent.getService(this, 0, prevIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        Intent pauseIntent = new Intent(this, MusicService.class);
+        pauseIntent.setAction("PAUSE");
+        PendingIntent pausePendingIntent = PendingIntent.getService(this, 0, pauseIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        Intent nextIntent = new Intent(this, MusicService.class);
+        nextIntent.setAction("NEXT");
+        PendingIntent nextPendingIntent = PendingIntent.getService(this, 0, nextIntent, PendingIntent.FLAG_IMMUTABLE);
+
+
         createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
@@ -56,6 +73,14 @@ public class MusicService extends Service {
                 .setContentText("Your music is running in the background")
                 .setSmallIcon(R.drawable.ic_music_note)
                 .setContentIntent(pendingIntent)
+                .addAction(R.drawable.ic_pause, "Previous", previousPendingIntent)
+
+                //TODO
+                // Incorporate previous song functionality + Fix isPlaying boolean;
+
+                .addAction(R.drawable.ic_play, "Play", playPendingIntent)
+                .addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)
+                .addAction(R.drawable.ic_next, "Next", nextPendingIntent)
                 .build();
 
         startForeground(1, notification);

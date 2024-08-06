@@ -1,8 +1,6 @@
 package com.example.tunevault;
 
-
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,10 +13,11 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.annotation.Nullable;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
-import android.os.Build;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayAdapter<String> arrayAdapterListView;
     private MusicService musicService = new MusicService();
     private boolean isPlaying = false;
+   // private Button playButton = findViewById(R.id.play);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,11 +44,6 @@ public class MainActivity extends AppCompatActivity {
         listViewSongs.setAdapter(arrayAdapterListView);
 
     }
-
-    public void updateIsPlaying(){
-
-    }
-
 
     public void addSong(View view) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);

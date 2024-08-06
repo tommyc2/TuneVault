@@ -39,7 +39,6 @@
         android:layout_marginBottom="32dp"
         android:onClick="handlePlayPause"
         android:text="Play"
-        app:icon="@android:drawable/ic_media_play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
